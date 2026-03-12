@@ -45,15 +45,12 @@ import uuid
 from pathlib import Path
 from queue import Queue
 
-from anthropic import Anthropic
+from _anthropic_client import build_client
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
-if os.getenv("ANTHROPIC_BASE_URL"):
-    os.environ.pop("ANTHROPIC_AUTH_TOKEN", None)
-
 WORKDIR = Path.cwd()
-client = Anthropic(base_url=os.getenv("ANTHROPIC_BASE_URL"))
+client = build_client()
 MODEL = os.environ["MODEL_ID"]
 
 TEAM_DIR = WORKDIR / ".team"
