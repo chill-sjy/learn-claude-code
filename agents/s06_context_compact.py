@@ -42,6 +42,12 @@ from pathlib import Path
 from _anthropic_client import build_client
 from dotenv import load_dotenv
 
+try:
+    from langfuse import observe
+except ImportError:
+    def observe(func=None, **_):  # no-op fallback if langfuse not installed
+        return func if func else lambda f: f
+
 load_dotenv(override=True)
 
 WORKDIR = Path.cwd()
@@ -50,7 +56,7 @@ MODEL = os.environ["MODEL_ID"]
 
 SYSTEM = f"You are a coding agent at {WORKDIR}. Use tools to solve tasks."
 
-THRESHOLD = 50000
+THRESHOLD = 5000
 TRANSCRIPT_DIR = WORKDIR / ".transcripts"
 KEEP_RECENT = 3
 
@@ -91,6 +97,7 @@ def micro_compact(messages: list) -> list:
 
 
 # -- Layer 2: auto_compact - save transcript, summarize, replace messages --
+@observe(name="auto_compact")
 def auto_compact(messages: list) -> list:
     # Save full transcript to disk
     TRANSCRIPT_DIR.mkdir(exist_ok=True)
@@ -188,6 +195,7 @@ TOOLS = [
 ]
 
 
+@observe(name="agent_loop")
 def agent_loop(messages: list):
     while True:
         # Layer 1: micro_compact before each LLM call

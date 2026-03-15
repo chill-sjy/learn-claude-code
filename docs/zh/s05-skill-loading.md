@@ -106,3 +106,86 @@ python agents/s05_skill_loading.py
 2. `Load the agent-builder skill and follow its instructions`
 3. `I need to do a code review -- load the relevant skill first`
 4. `Build an MCP server using the mcp-builder skill`
+
+response 加载 skills 时的返回：
+```json
+{
+    "id": "msg_01RKnKQPERcbPbZcF9PBx70i",
+    "container": null,
+    "content": [
+        {
+            "citations": null,
+            "text": "I can help you with these tasks. Let me address each one:\n\n**1. Available skills:**\n- agent-builder\n- code-review: For thorough code reviews with security, performance, and maintainability analysis\n- mcp-builder: For building MCP (Model Context Protocol) servers that give Claude new capabilities\n- pdf: For processing PDF files - extract text, create PDFs, merge documents\n\n**2. Loading agent-builder skill:**",
+            "type": "text"
+        },
+        {
+            "id": "toolu_w9Y0VyQra6tLP3vLz5JIF3",
+            "caller": null,
+            "input": {
+                "name": "agent-builder"
+            },
+            "name": "load_skill",
+            "type": "tool_use"
+        }
+    ],
+    "model": "claude-sonnet-4-6",
+    "role": "assistant",
+    "stop_reason": "tool_use",
+    "stop_sequence": null,
+    "type": "message",
+    "usage": {
+        "cache_creation": {
+            "ephemeral_1h_input_tokens": null,
+            "ephemeral_5m_input_tokens": 1100
+        },
+        "cache_creation_input_tokens": 1100,
+        "cache_read_input_tokens": 0,
+        "inference_geo": null,
+        "input_tokens": 1,
+        "output_tokens": 338,
+        "server_tool_use": null,
+        "service_tier": null,
+        "claude_cache_creation_5_m_tokens": 0,
+        "claude_cache_creation_1_h_tokens": 0
+    }
+}
+```
+
+加载完第一个 skill 后，claude 的返回：
+
+```json
+{
+    "id": "msg_01lCpErnvOMHKv6NZwadISen",
+    "container": null,
+    "content": [
+        {
+            "citations": null,
+            "text": "Great! I've loaded the agent-builder skill. Here's what it teaches:\n\n**Core Philosophy**: The model already knows how to be an agent - your job is to get out of the way. An agent is just a simple loop where the model sees context + capabilities, decides to act or respond, executes actions, and continues.\n\n**The Three Elements**:\n1. **Capabilities** - What can it DO? (3-5 atomic actions to start)\n2. **Knowledge** - What does it KNOW? (domain expertise loaded on-demand)\n3. **Context** - What has happened? (conversation history)\n\n**Key Principles**:\n- Start with 3-5 capabilities, add more only when needed\n- Trust the model to reason - don't over-engineer workflows\n- Load knowledge on-demand, not upfront\n- Keep context clean and focused\n\n**Progressive Complexity** (add only when needed):\n- Basic: 3-5 capabilities (always start here)\n- Planning: Progress tracking (for multi-step tasks)\n- Subagents: Isolated child agents (when exploration pollutes context)\n- Skills: On-demand knowledge (when domain expertise needed)\n\nThe skill includes references for implementation patterns, minimal agent examples, and scaffolding scripts.\n\n**For your other requests:**\n\n**3. Code review** - Ready to load the code-review skill when you need it.\n\n**4. MCP server** - Ready to load the mcp-builder skill when you want to build one.\n\nWhich would you like to tackle next?",
+            "type": "text"
+        }
+    ],
+    "model": "claude-sonnet-4-6",
+    "role": "assistant",
+    "stop_reason": "end_turn",
+    "stop_sequence": null,
+    "type": "message",
+    "usage": {
+        "cache_creation": {
+            "ephemeral_1h_input_tokens": null,
+            "ephemeral_5m_input_tokens": 2990
+        },
+        "cache_creation_input_tokens": 2990,
+        "cache_read_input_tokens": 0,
+        "inference_geo": null,
+        "input_tokens": 1,
+        "output_tokens": 1087,
+        "server_tool_use": null,
+        "service_tier": null,
+        "claude_cache_creation_5_m_tokens": 0,
+        "claude_cache_creation_1_h_tokens": 0
+    }
+}
+```
+
+这里就是整个消息列表，等待下一次用户输入：
+![alt text](image.png)
