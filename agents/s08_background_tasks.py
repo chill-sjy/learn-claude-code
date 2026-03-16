@@ -33,6 +33,12 @@ from pathlib import Path
 from _anthropic_client import build_client
 from dotenv import load_dotenv
 
+try:
+    from langfuse import observe
+except ImportError:
+    def observe(func=None, **_):  # no-op fallback if langfuse not installed
+        return func if func else lambda f: f
+
 load_dotenv(override=True)
 
 WORKDIR = Path.cwd()
@@ -180,7 +186,7 @@ TOOLS = [
      "input_schema": {"type": "object", "properties": {"task_id": {"type": "string"}}}},
 ]
 
-
+@observe(name="s08_agent_loop")
 def agent_loop(messages: list):
     while True:
         # Drain background notifications and inject as system message before LLM call

@@ -125,3 +125,7 @@ python agents/s07_task_system.py
 2. `List all tasks and show the dependency graph`
 3. `Complete task 1 and then list tasks to see task 2 unblocked`
 4. `Create a task board for refactoring: parse -> transform -> emit -> test, where transform and emit can run in parallel after parse`
+
+我的理解
+1. 任务系统是存取 task_*.json 来实现的
+2. 任务之间的关系是 task 中的参数，比如 block_by_id: 4, 表示受到任务 4 的阻塞

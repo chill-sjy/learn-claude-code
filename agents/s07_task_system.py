@@ -29,6 +29,12 @@ from pathlib import Path
 from _anthropic_client import build_client
 from dotenv import load_dotenv
 
+try:
+    from langfuse import observe
+except ImportError:
+    def observe(func=None, **_):  # no-op fallback if langfuse not installed
+        return func if func else lambda f: f
+
 load_dotenv(override=True)
 
 WORKDIR = Path.cwd()
@@ -202,7 +208,7 @@ TOOLS = [
      "input_schema": {"type": "object", "properties": {"task_id": {"type": "integer"}}, "required": ["task_id"]}},
 ]
 
-
+@observe(name="agent_loop")
 def agent_loop(messages: list):
     while True:
         response = client.messages.create(
