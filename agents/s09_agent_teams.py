@@ -52,6 +52,19 @@ from pathlib import Path
 from _anthropic_client import build_client
 from dotenv import load_dotenv
 
+import uuid
+
+try:
+    from langfuse import observe, get_client
+    _lf = get_client()  # Langfuse client for dynamic span naming and session grouping
+except ImportError:
+    def observe(func=None, **_):  # no-op fallback if langfuse not installed
+        return func if func else lambda f: f
+    _lf = None
+
+# Session ID: groups ALL agents (lead + alice + bob) from one script run into one Langfuse Session
+SESSION_ID = f"s09-{uuid.uuid4().hex[:8]}"
+
 load_dotenv(override=True)
 WORKDIR = Path.cwd()
 client = build_client()
@@ -158,8 +171,13 @@ class TeammateManager:
         self.threads[name] = thread
         thread.start()
         return f"Spawned '{name}' (role: {role})"
-
+    
+    @observe(name="s09_teammate")
     def _teammate_loop(self, name: str, role: str, prompt: str):
+        # ---- Langfuse: 动态命名 + Session 分组（简洁版）----
+        if _lf:
+            _lf.update_current_span(name=f"s09_teammate_{name}", metadata={"role": role})
+            _lf.update_current_trace(session_id=SESSION_ID)
         sys_prompt = (
             f"You are '{name}', role: {role}, at {WORKDIR}. "
             f"Use send_message to communicate. Complete your task."
@@ -337,8 +355,11 @@ TOOLS = [
      "input_schema": {"type": "object", "properties": {"content": {"type": "string"}}, "required": ["content"]}},
 ]
 
-
+@observe(name="s09_main")
 def agent_loop(messages: list):
+    # ---- Langfuse: Session 分组（所有 agent 归到同一个 Session）----
+    if _lf:
+        _lf.update_current_trace(session_id=SESSION_ID, metadata={"agent": "lead"})
     while True:
         inbox = BUS.read_inbox("lead")
         if inbox:
